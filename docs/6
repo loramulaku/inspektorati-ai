@@ -1,0 +1,26 @@
+STEP 6 — Frontend (React + Vite)
+
+What I did:
+- Scaffolded a React project with Vite inside the frontend/ folder, using
+  the JavaScript "react" template (not TypeScript).
+    command used: npm create vite@latest frontend -- --template react
+- Installed the frontend dependencies:
+    command used: npm install   (run inside frontend/)
+
+Verified:
+- Node version: v22.14.0
+- npm version:  10.9.2
+- react:        19.3.1
+- react-dom:    19.3.1
+- vite:         8.3.4
+
+Key files (created by Vite, left unmodified):
+    frontend/index.html         -> page entry
+    frontend/src/main.jsx        -> boots the React app
+    frontend/src/App.jsx         -> root component
+    frontend/vite.config.js      -> Vite config
+    frontend/package.json        -> scripts and dependencies
+
+Useful commands (run inside frontend/):
+    npm run dev     -> start development server
+    npm run build   -> build for production

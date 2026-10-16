@@ -1,0 +1,18 @@
+STEP 7 — Tailwind CSS (v4)
+
+What I did:
+- Installed Tailwind CSS v4 and its official Vite plugin:
+    tailwindcss          4.3.3
+    @tailwindcss/vite    4.3.3
+- Wired the plugin into frontend/vite.config.js:
+    import tailwindcss from '@tailwindcss/vite'
+    plugins: [react(), tailwindcss()]
+- Enabled Tailwind in the CSS by adding this line at the top of
+  frontend/src/index.css:
+    @import "tailwindcss";
+
+Why the v4 approach:
+- Tailwind v4 is the current standard and the simplest setup. It does NOT
+  need a tailwind.config.js or a postcss.config.js file. The Vite plugin
+  plus the single @import line is all that's required. You can use Tailwind
+  utility classes in your components right away.

@@ -1,0 +1,21 @@
+STEP 1 — Project folders and .gitignore
+
+What I did:
+- Created the main project folders:
+    backend/   -> the Python/FastAPI side
+    frontend/  -> the React (Vite) side
+    docs/      -> these step-by-step notes
+    test/      -> small test scripts (nothing else goes here)
+- Also created the backend package folders:
+    backend/app/
+    backend/app/core/   (settings)
+    backend/app/db/      (database)
+- Updated the existing .gitignore. It already ignored Python stuff, .env,
+  venv/ and build output. I added a Node section so Git ignores:
+    node_modules/        (huge, re-installable)
+    frontend/dist/, frontend/build/   (frontend build output)
+    .vite/ and npm/yarn/pnpm debug logs
+
+Why:
+- Clean separation between backend and frontend from day one.
+- Git should never track installed dependencies or secret files.

@@ -1,0 +1,17 @@
+STEP 5 — Database connection test
+
+What I did:
+- Created test/test_db.py. It imports the backend connection module,
+  opens a connection to the local MySQL database "inspektorati", closes it,
+  and prints "DB OK" if everything worked (or "DB FAILED: ..." with the
+  reason if not).
+
+How to run it:
+    backend\venv\Scripts\python.exe test\test_db.py
+
+Result:
+    DB OK
+
+Meaning:
+- MySQL is running on 127.0.0.1:3306, the root login worked, and the
+  database "inspektorati" exists. The backend can talk to the database.

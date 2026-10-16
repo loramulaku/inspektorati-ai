@@ -1,0 +1,19 @@
+STEP 2 — Python virtual environment (venv)
+
+What I did:
+- Created a virtual environment inside the backend folder:
+    backend/venv/
+- Upgraded pip inside it to the latest version.
+
+How to use it later (Windows):
+- Activate:   backend\venv\Scripts\activate
+- Or call Python directly without activating:
+    backend\venv\Scripts\python.exe <script.py>
+
+Verified:
+- Python version: 3.13.2
+- pip version:    26.2.1
+
+Why:
+- A venv keeps this project's Python packages separate from the rest of the
+  computer, so versions never clash with other projects.

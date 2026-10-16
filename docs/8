@@ -1,0 +1,18 @@
+STEP 8 — Verify the frontend works
+
+What I did:
+- Started the dev server with "npm run dev" inside frontend/.
+    Result: Vite started successfully in ~0.6s at http://localhost:5173/
+    with no errors. Then I stopped it.
+- Also ran "npm run build" to confirm the whole pipeline (including
+  Tailwind) compiles for production.
+    Result: build succeeded; Tailwind produced a CSS bundle
+    (dist/assets/index-*.css, ~10 KB). I deleted the dist/ output
+    afterwards because it is throwaway build output.
+
+Meaning:
+- The React + Vite + Tailwind setup is fully working and ready to use.
+
+To start working on the frontend:
+    cd frontend
+    npm run dev

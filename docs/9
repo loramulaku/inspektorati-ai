@@ -1,0 +1,32 @@
+STEP 9 — Final verification checklist
+
+Everything was checked and is working:
+
+[OK] Python version ................... 3.13.2
+[OK] pip packages (in backend/venv):
+        fastapi                0.143.3
+        uvicorn                0.54.0
+        python-dotenv          1.2.4
+        google-generativeai    0.8.6
+        mysql-connector-python 26.7.0
+[OK] Node version ..................... v22.14.0
+[OK] npm packages (in frontend):
+        react                  19.3.1
+        react-dom              19.3.1
+        vite                   8.3.4
+        tailwindcss            4.3.3
+        @tailwindcss/vite      4.3.3
+[OK] Tailwind configured .............. yes (Vite plugin + @import)
+[OK] Frontend dev server boots ........ yes (http://localhost:5173/)
+[OK] DB connection test ............... "DB OK"
+
+Project scaffolding is complete. No application features were added yet.
+
+What is left for YOU to do:
+- Fill in GEMINI_API_KEY in backend/.env when you want to use the AI.
+
+How to run things later:
+- Backend API:   backend\venv\Scripts\python.exe -m uvicorn app.main:app --reload
+                 (run from inside the backend/ folder)
+- DB test:       backend\venv\Scripts\python.exe test\test_db.py
+- Frontend:      cd frontend ; npm run dev

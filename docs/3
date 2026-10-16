@@ -1,0 +1,18 @@
+STEP 3 — Backend Python packages
+
+What I did (installed inside backend/venv):
+- fastapi                 0.143.3   -> web framework for the API
+- uvicorn                 0.54.0    -> server that runs FastAPI
+- python-dotenv           1.2.4     -> reads settings from the .env file
+- google-generativeai     0.8.6     -> Google Gemini AI SDK
+- mysql-connector-python  26.7.0    -> connects Python to MySQL
+
+Then I saved the full list of installed packages to:
+    backend/requirements.txt
+
+How to reinstall everything later:
+    backend\venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+
+Note:
+- Google now also offers a newer SDK called "google-genai". We used
+  "google-generativeai" as requested; it installs and works fine on Python 3.13.

@@ -1,0 +1,29 @@
+STEP 4 — Backend source files and environment config
+
+Files created:
+- backend/.env
+    The real settings file. Contains DB credentials and an empty
+    GEMINI_API_KEY for you to fill in. This file is git-ignored (never
+    committed) because it holds secrets.
+- backend/.env.example
+    A template with the same keys but no values. This one IS committed, so
+    anyone cloning the project knows which settings are needed.
+
+- backend/app/core/config.py
+    Loads backend/.env (using python-dotenv) and exposes the settings:
+    GEMINI_API_KEY, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME.
+
+- backend/app/db/connection.py
+    A small function get_connection() that opens a MySQL connection using
+    the settings from config.py.
+
+- backend/app/main.py
+    The FastAPI entry point. Right now it only creates the app instance
+    (app = FastAPI(...)). No routes/features yet, on purpose.
+
+- Empty __init__.py files in app/, app/core/, app/db/ so Python treats
+  these folders as packages.
+
+Why this layout:
+- It's the standard FastAPI structure: settings in core/, database in db/,
+  app entry in main.py. It stays clean as features are added later.
