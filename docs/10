@@ -1,0 +1,65 @@
+STEP 10 — Database schema with migrations (Alembic)
+
+What I did:
+- Installed Alembic and SQLAlchemy in backend/venv and updated
+  backend/requirements.txt (added: alembic, SQLAlchemy, Mako, MarkupSafe).
+- Created the 16 tables of the "inspektorati" database with ONE migration:
+    backend/migrations/versions/0001_init_schema.py
+  All tables are InnoDB, utf8mb4 / utf8mb4_unicode_ci. Every foreign key has
+  its own index and the ON DELETE rule from the spec. No data was seeded.
+
+Why Alembic (and not hand-written .sql files):
+- It is the standard migration tool for Python + SQLAlchemy and keeps a
+  version history of the database schema (like git, but for tables).
+- It records which migrations already ran in the table "alembic_version",
+  so "upgrade" only runs what is new.
+- Every migration has an upgrade() and a downgrade(), so changes can be
+  rolled back.
+- The SQLAlchemy models (app/db/models.py) describe the same schema in
+  Python. "alembic check" compares them to the real database and tells us
+  if they ever drift apart. Later features can use the models to read and
+  write data.
+
+Files added:
+- backend/alembic.ini
+    Alembic settings. It has NO database URL inside; the URL is built
+    from backend/.env so the password lives in one place only.
+- backend/migrations/env.py
+    Connects Alembic to MySQL using app.core.config (the .env values)
+    and points it at the models.
+- backend/migrations/versions/0001_init_schema.py
+    The migration itself: creates the 16 tables in dependency order
+    (upgrade) and drops them in reverse order (downgrade).
+- backend/app/db/models.py
+    One SQLAlchemy class per table.
+
+Migration commands (run from inside backend/):
+    venv\Scripts\python.exe -m alembic upgrade head      -> create / update all tables
+    venv\Scripts\python.exe -m alembic downgrade -1      -> undo the last migration
+    venv\Scripts\python.exe -m alembic downgrade base    -> undo ALL migrations (drops the 16 tables and their data)
+    venv\Scripts\python.exe -m alembic current           -> show which migration the DB is at
+    venv\Scripts\python.exe -m alembic history           -> list all migrations
+    venv\Scripts\python.exe -m alembic check             -> confirm models and DB match
+
+Adding a new migration later (after changing app/db/models.py):
+    venv\Scripts\python.exe -m alembic revision --autogenerate -m "short description"
+    (always read the generated file before running "upgrade head")
+
+Verified:
+- "alembic upgrade head" ran; "alembic current" shows: 0001 (head)
+- "alembic check": No new upgrade operations detected (models = DB)
+- "alembic downgrade base" removed all 16 tables; "upgrade head" created
+  them again.
+- All 16 tables exist (InnoDB, utf8mb4_unicode_ci):
+     1. kategorite            9. procesverbalet
+     2. perdoruesit          10. dokumentet_ligjore
+     3. refresh_tokens       11. nenet_ligjore
+     4. masat_shkallezimi    12. attachments
+     5. subjektet            13. vendimet
+     6. lokacionet           14. ankesat
+     7. kerkesat             15. njoftimet
+     8. kerkesa_ai           16. audit_log
+  plus "alembic_version" (Alembic's own tracking table).
+- 29 foreign keys, each with the correct ON DELETE rule, every FK column
+  indexed, no duplicate indexes.
+- test/test_db.py: DB OK
