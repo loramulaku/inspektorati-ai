@@ -184,6 +184,17 @@ class Kerkese(Base):
     caktuar_nga = fk_column("perdoruesit.id", "SET NULL")
     created_at = created_at_column()
     updated_at = updated_at_column()
+    # Citizen portal intake (migration 0002)
+    lloji = mapped_column(Enum("kerkese", "ankese"), nullable=False)
+    aplikuesi_emri = mapped_column(String(80), nullable=False)
+    aplikuesi_mbiemri = mapped_column(String(80), nullable=False)
+    aplikuesi_numri_personal = mapped_column(String(10), nullable=False)
+    aplikuesi_email = mapped_column(String(120))
+    aplikuesi_telefoni = mapped_column(String(30), nullable=False)
+    aplikuesi_adresa = mapped_column(String(255))
+    deklarata_pranuar = mapped_column(Boolean, nullable=False, server_default=text("FALSE"))
+    # the exact name shown in the declaration, kept for the record
+    deklarata_emri = mapped_column(String(160), nullable=False)
 
 
 class KerkeseAI(Base):

@@ -231,3 +231,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Citizen uploads (personal data, never committed)
+backend/uploads/

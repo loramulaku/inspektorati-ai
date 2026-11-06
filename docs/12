@@ -1,0 +1,109 @@
+STEP 12 — Tests: unit, integration and Selenium (end-to-end)
+
+The project now has four kinds of automated tests:
+
+    layer        where                       what it checks                                       how many
+    -----------  --------------------------  ---------------------------------------------------  --------
+    unit (BE)    test/unit/                  single Python functions: password hashing, JWT,          35
+                                             input validation, role check, CORS setting
+    unit (FE)    frontend/src/**/*.test.js   single JS functions: date format, error messages,         9
+                                             role maps (Vitest)
+    integration  test/integration/           the real FastAPI app + real MySQL test database:         43
+                                             login, refresh, logout, /auth/me, roles, admin users
+    e2e          test/e2e/                   Selenium drives a real Edge browser through the          35
+                                             real frontend + backend: every page and flow
+
+None of them touch the real `inspektorati` database: they use
+`inspektorati_test`, which is dropped, recreated and migrated (Alembic) at
+the start of every pytest run.
+
+-------------------------------------------------------------------------
+HOW TO RUN  (Windows PowerShell, from the project root inspektorati-ai\)
+-------------------------------------------------------------------------
+All backend tests at once (unit + integration + Selenium, about 4 minutes):
+    backend\venv\Scripts\python.exe -m pytest
+
+One layer at a time:
+    backend\venv\Scripts\python.exe -m pytest test\unit           (seconds)
+    backend\venv\Scripts\python.exe -m pytest test\integration    (about 35 s)
+    backend\venv\Scripts\python.exe -m pytest test\e2e            (about 3 min)
+or by marker:
+    backend\venv\Scripts\python.exe -m pytest -m unit
+    backend\venv\Scripts\python.exe -m pytest -m "not e2e"        (everything except Selenium)
+
+Useful options:
+    -v                 show every test name
+    -x                 stop at the first failure
+    -k login           run only tests whose name contains "login"
+
+Frontend unit tests (from inside frontend\):
+    npm test
+
+-------------------------------------------------------------------------
+SELENIUM (test/e2e) — what you need to know
+-------------------------------------------------------------------------
+- Requirements: MySQL running, Microsoft Edge installed, Node/npm installed.
+  The first run needs internet once: Selenium downloads the matching
+  Edge driver by itself (Selenium Manager) and caches it.
+- You do NOT need to start the servers yourself. The tests start their own:
+      backend   http://localhost:8001   (database inspektorati_test)
+      frontend  http://localhost:5180   (talks to the backend on 8001)
+  and stop them at the end. Ports 8001 and 5180 must be free; your normal
+  dev servers (8000 / 5173 / 5174) can keep running.
+- The seed users (admin / inspektor / drejtor) are created in the test
+  database automatically.
+- Watch the browser while the tests run:
+      $env:E2E_HEADED = "1"; backend\venv\Scripts\python.exe -m pytest test\e2e
+  Use Chrome instead of Edge:
+      $env:E2E_BROWSER = "chrome"
+  (remove them again with:  Remove-Item Env:E2E_HEADED, Env:E2E_BROWSER)
+
+What the Selenium tests cover:
+- Landing: headline, both paths, AI highlight, admin note, stema logo,
+  no "create account" link; citizen button -> /kerkese; staff buttons
+  (header and hero) -> /kycu.
+- Login page: texts, logo, back link; empty fields error; wrong password and
+  unknown email error; show/hide password; login with the Enter key.
+- /regjistrohu and unknown pages go back to the landing page.
+- Logged out: /inspektor, /drejtor, /admin, /admin/perdoruesit -> /kycu.
+- Each role (inspektor, drejtor, admin): lands on its own dashboard, sees
+  "Mirë se erdhe, {emri}! Roli juaj është {roli}.", its protected API route
+  answers (LEJUAR), name and role in the sidebar.
+- Wrong role is sent to its own dashboard; logged-in user opening /kycu is
+  sent to the dashboard; only the admin sees "Përdoruesit & rolet".
+- Welcome message can be closed and shows only once; the session survives a
+  page reload; logout clears the session and closes the protected pages.
+- Admin: dashboard link to user management; creates a user who can then log
+  in; duplicate email error; edits a user; deactivates a user (confirm
+  dialog) who is then locked out, reactivates them and they can log in
+  again; no "Çaktivizo" button on their own row; "Anulo" closes the form.
+
+-------------------------------------------------------------------------
+OTHER CHECKS
+-------------------------------------------------------------------------
+- Live API check against YOUR running servers (real database, cleans up
+  after itself) — see docs/11:
+      backend\venv\Scripts\python.exe test\e2e_auth_flow.py
+- Database connection:
+      backend\venv\Scripts\python.exe test\test_db.py
+- Frontend lint / build (inside frontend\):
+      npm run lint
+      npm run build
+
+Result at the end of this step: 113 backend tests passed (35 unit,
+43 integration, 35 Selenium) and 9 frontend unit tests passed.
+
+-------------------------------------------------------------------------
+FILES
+-------------------------------------------------------------------------
+    pytest.ini                     test folders + markers (unit / integration / e2e)
+    test/conftest.py               shared setup: test database, layer markers
+    test/helpers.py                shared values (paths, test DB name, password)
+    test/unit/                     backend unit tests
+    test/integration/conftest.py   TestClient + DB fixtures (tables emptied per test)
+    test/integration/              API tests
+    test/e2e/conftest.py           starts the servers, opens the browser, page helpers
+    test/e2e/test_ui.py            the Selenium tests
+    frontend/src/**/*.test.js      frontend unit tests (Vitest)
+New dependencies: selenium (backend/requirements.txt), vitest and
+@types/node (frontend dev dependencies).

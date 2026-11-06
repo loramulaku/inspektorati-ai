@@ -22,3 +22,19 @@ DB_PORT = int(os.getenv("DB_PORT", "3306"))
 DB_USER = os.getenv("DB_USER", "root")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 DB_NAME = os.getenv("DB_NAME", "inspektorati")
+
+# Authentication (JWT)
+JWT_SECRET = os.getenv("JWT_SECRET", "")
+ACCESS_TOKEN_MINUTES = int(os.getenv("ACCESS_TOKEN_MINUTES", "15"))
+REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS", "7"))
+
+# Folder for files citizens upload with a kërkesë (never inside the code).
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", str(BACKEND_DIR / "uploads"))).resolve()
+
+# Frontend addresses allowed to call the API from the browser (CORS),
+# comma-separated. Vite uses 5173, or 5174 when 5173 is already taken.
+FRONTEND_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("FRONTEND_ORIGIN", "http://localhost:5173,http://localhost:5174").split(",")
+    if origin.strip()
+]

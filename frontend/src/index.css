@@ -1,113 +1,95 @@
 @import "tailwindcss";
 
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+/* Design tokens from the Inspektorati AI design specification (section 9).
+   Tailwind v4 turns each --color-*, --radius-*, --shadow-* and --text-* variable
+   into utility classes, e.g. bg-primary, rounded-card, shadow-card, text-body. */
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* brand */
+  --color-primary: #0d9488;
+  --color-primary-hover: #0f766e;
+  --color-primary-tint: #e0f5f3;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* surfaces */
+  --color-sidebar: #0f172a;
+  --color-sidebar-card: #21293e;
+  --color-page: #f4f6f9;
+  --color-sunken: #f9fafc;
+  --color-quote: #f7f9fb;
+  --color-neutral-tint: #edf0f4;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+  /* lines & text */
+  --color-line: #e2e8f0;
+  --color-line-strong: #cbd5e1;
+  --color-ink: #0f172a;
+  --color-ink-2: #64748b;
+  --color-ink-3: #9eaabd;
+  --color-on-dark: #f1f5f9;
+  --color-on-dark-2: #94a3b8;
+
+  /* status */
+  --color-danger: #dc2626;
+  --color-danger-bg: #fee2e2;
+  --color-warning: #b45309;
+  --color-warning-bg: #fef3c7;
+  --color-success: #15803d;
+  --color-success-bg: #dcfce7;
+
+  /* public pages (landing, login): colours taken from the reference screenshots */
+  --color-civic-blue: #2563eb;
+  --color-civic-blue-hover: #1d4ed8;
+  --color-civic-sky: #3b82f6;
+  --color-civic-night: #0b1120;
+
+  /* shape */
+  --radius-tag: 6px;
+  --radius-sm: 8px;
+  --radius-btn: 9px;
+  --radius-btn-lg: 10px;
+  --radius-item: 12px;
+  --radius-card: 14px;
+  --radius-card-lg: 16px;
+  --radius-pill: 20px;
+  --shadow-card: 0 1px 3px 0 rgba(15, 23, 42, 0.05);
+
+  /* type scale */
+  --text-micro: 9px;
+  --text-eyebrow: 10px;
+  --text-caption: 11px;
+  --text-meta: 12px;
+  --text-body: 13px;
+  --text-body--line-height: 20px;
+  --text-body-lg: 14px;
+  --text-body-lg--line-height: 22px;
+  --text-card-title: 15px;
+  --text-tracker: 16px;
+  --text-page-title: 18px;
+  --text-heading: 26px;
+  --text-display: 28px;
+  --text-brand: 30px;
+  --text-stat: 32px;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
   }
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  body {
+    margin: 0;
+    background: var(--color-page);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+  /* Keyboard focus ring (spec 4.3, derived). */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
-}
-
-body {
-  margin: 0;
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
 }

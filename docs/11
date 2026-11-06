@@ -1,0 +1,147 @@
+STEP 11 — EPIC 2: Authentication & Authorization
+
+What was built:
+- Staff login with JWT (short-lived access token + long-lived refresh token).
+  Refresh tokens are stored (as a SHA-256 hash) in `refresh_tokens`, so
+  logging out revokes them for real.
+- Passwords are hashed with bcrypt (passlib) before they are stored.
+- Role-based access: inspektor, drejtor, admin. Citizens have no account.
+- NO self-registration. Staff accounts are created only by an admin
+  (POST /admin/users, "Përdoruesit & rolet" page) or by the seed script.
+- Admin user management: list, create, edit, deactivate / reactivate.
+- Frontend: landing page, split-screen login, welcome message after login
+  ("Mirë se erdhe, {emri}! Roli juaj është {roli}."), placeholder dashboard
+  per role, admin "Përdoruesit & rolet" page.
+- The coat of arms (frontend/public/stema.svg) is the logo everywhere:
+  landing, login, app sidebar, citizen page and browser tab icon.
+- No new migration was needed: `perdoruesit` and `refresh_tokens` already
+  exist from migration 0001 ("alembic check" is still clean).
+
+-------------------------------------------------------------------------
+SEED CREDENTIALS (test accounts in the real `inspektorati` database)
+-------------------------------------------------------------------------
+    role       email                            password
+    admin      admin@vushtrri.rks-gov.net       Admin!2026
+    inspektor  inspektor@vushtrri.rks-gov.net   Inspektor!2026
+    drejtor    drejtor@vushtrri.rks-gov.net     Drejtor!2026
+
+Create them (or reset their passwords) at any time, from inside backend/:
+    venv\Scripts\python.exe scripts\seed_users.py
+These are for development only. Change them before any real use.
+
+-------------------------------------------------------------------------
+ENDPOINTS (backend, http://localhost:8000 — interactive docs at /docs)
+-------------------------------------------------------------------------
+Auth (there is no /auth/register: it returns 404)
+    POST /auth/login      { email, password } -> access_token, refresh_token, user
+    POST /auth/refresh    { refresh_token } -> new access_token
+    POST /auth/logout     { refresh_token } -> 204, the token is revoked
+    GET  /auth/me         current user (needs "Authorization: Bearer <access_token>")
+    GET  /auth/sektoret   public list of sectors (top-level kategorite) for the user form
+
+Role-protected examples (one per role; other roles get 403)
+    GET /inspektor/paneli    inspektor only
+    GET /drejtor/paneli      drejtor only
+    GET /admin/paneli        admin only
+
+Admin user management (admin only)
+    GET   /admin/users                   list all staff users
+    POST  /admin/users                   create a user (any role) — the only way to add staff
+    PATCH /admin/users/{id}              edit name, email, role, sector, phone, aktiv
+    POST  /admin/users/{id}/deactivate   aktiv = false + revoke all their sessions
+
+Error messages are in Albanian, e.g. "Email ose fjalëkalim i pasaktë",
+"Nuk keni leje për këtë veprim".
+
+-------------------------------------------------------------------------
+HOW TO RUN
+-------------------------------------------------------------------------
+1. Backend (from inside backend/):
+       venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
+2. Frontend (from inside frontend/):
+       npm run dev
+   Open the address Vite prints. It is http://localhost:5173, or
+   http://localhost:5174 if 5173 is already taken by another project
+   (both are allowed by the backend's CORS setting FRONTEND_ORIGIN).
+
+Frontend pages:
+    /                    landing (two paths: citizen request / staff login)
+    /kerkese             citizen request (placeholder, comes in a later epic)
+    /kycu                staff login
+    /inspektor, /drejtor, /admin   dashboard per role (placeholder; shows the
+                                   welcome message once, right after login)
+    /admin/perdoruesit   user management (admin)
+
+-------------------------------------------------------------------------
+HOW TO TEST   (full testing guide, incl. unit and Selenium tests: docs/12)
+-------------------------------------------------------------------------
+1. Backend API tests (43 integration tests, from the project root):
+       backend\venv\Scripts\python.exe -m pytest test\integration -v
+   They use a SEPARATE database, `inspektorati_test`, which is dropped,
+   recreated and migrated with Alembic on every run. The real
+   `inspektorati` data is never touched.
+   Covered: /auth/register does not exist, login (correct / wrong password /
+   inactive user), refresh, logout (revoked token can't refresh), /auth/me
+   (valid / missing / expired / forged / refresh-token-as-access), role
+   routes (allowed vs 403), admin create (every role, bcrypt hash stored,
+   sector, duplicate email, short password) / edit / deactivate.
+
+2. Live end-to-end check (backend + frontend running, seed users created):
+       backend\venv\Scripts\python.exe test\e2e_auth_flow.py
+   If Vite runs on 5174, first:  $env:E2E_FRONTEND = "http://localhost:5174"
+   Real HTTP against the real database: admin creates an inspektor -> login
+   -> protected route -> refresh -> logout -> admin user management, plus
+   CORS, "no /auth/register", and the frontend pages. It deletes the users
+   it creates.
+
+3. Frontend checks (from inside frontend/):
+       npm run lint
+       npm run build
+
+4. By hand: open the frontend, log in with a seed account above, and you
+   land on that role's dashboard. Its "Qasja në API" card shows LEJUAR when
+   the protected route accepted you.
+
+Result at the end of this step: 43/43 pytest, 28/28 live E2E checks,
+lint and build clean; the browser flow (admin creates a user in the UI ->
+that user logs in -> welcome message -> role redirect -> reload keeps the
+session -> logout) was also verified in headless Edge (22/22 checks).
+
+-------------------------------------------------------------------------
+DECISIONS
+-------------------------------------------------------------------------
+- No registration at all: there is no register page and no /auth/register.
+  Where a "create account" link would be, the landing and login pages say
+  "Llogaritë krijohen nga administratori i inspektoratit."
+- Design: the landing and login pages follow the reference screenshots
+  (dark hero, split-screen login, blue accent #2563EB). The staff app
+  screens follow the design specification PDF (teal accent #0D9488).
+- Welcome message: shown once on the dashboard right after a login; it does
+  not come back on reload or when returning to the dashboard.
+- Logo: frontend/public/stema.svg is the coat of arms of the Republic of
+  Kosovo (from the provided file). To use the Vushtrri municipal crest
+  instead, replace that one file.
+- Sector: optional, read from `kategorite` (top-level rows). The table is
+  empty until categories are seeded, so the dropdown shows
+  "Nuk ka sektorë ende".
+- Tokens: access 15 min, refresh 7 days (ACCESS_TOKEN_MINUTES,
+  REFRESH_TOKEN_DAYS in backend/.env). /auth/refresh returns a new access
+  token and keeps the same refresh token (no rotation).
+- Token storage in the browser: access token only in memory; refresh token
+  in localStorage so a page reload keeps you logged in. The API client
+  refreshes automatically on a 401 and logs out if that fails.
+- Deactivated users cannot log in, refresh, or use an old access token, and
+  all their refresh tokens are revoked. An admin cannot deactivate or demote
+  their own account (so the system never loses its admin by accident).
+- Users are never deleted, only deactivated.
+- passlib: the original passlib 1.7.4 is unmaintained and breaks with
+  bcrypt 5, so the maintained drop-in fork "libpass" is installed (the code
+  still does "from passlib.context import CryptContext"). Passwords must be
+  8–72 bytes (bcrypt's limit).
+- JWT library: PyJWT. JWT_SECRET is in backend/.env (generated, never
+  committed). The app refuses to start without it.
+- Starlette's test client now wants "httpx2" instead of "httpx", so httpx2
+  is installed.
+- New backend settings in .env / .env.example: JWT_SECRET,
+  ACCESS_TOKEN_MINUTES, REFRESH_TOKEN_DAYS, FRONTEND_ORIGIN
+  (comma-separated list of allowed frontend addresses).
